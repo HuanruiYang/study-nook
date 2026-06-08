@@ -15,19 +15,35 @@ function renderContent(text: string) {
   })
 }
 
+const STAGE_LABELS: Record<NonNullable<ReviewLayer['stage']>, string> = {
+  before: '读之前',
+  during: '阅读之中',
+  after: '读之后',
+}
+
 export default function ReviewLayerCard({ layer, onDelete }: Props) {
   const isLong = layer.word_count > 300
   const [expanded, setExpanded] = useState(!isLong)
   const [confirmDelete, setConfirmDelete] = useState(false)
 
-  const date = new Date(layer.created_at).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })
+  const date = new Date(layer.created_at).toLocaleString('zh-CN', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
   const preview = layer.content.slice(0, 100)
+  const stageLabel = layer.stage ? STAGE_LABELS[layer.stage] : '阅读感受'
 
   return (
     <div className="bg-[#E8E3D8] border border-black/10 rounded-xl p-5">
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
+      <div className="flex items-start justify-between gap-3 mb-3">
+        <div className="flex items-center gap-2 flex-wrap">
           <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: layer.color }} />
+          <span className="text-[11px] px-2 py-0.5 rounded-full bg-[#F5F2EB] text-[#7A7468] border border-black/10">
+            {stageLabel}
+          </span>
           <span className="text-[13px] font-medium text-[#3D3A32]">{layer.label}</span>
           <span className="text-[12px] text-[#7A7468]">{date}</span>
         </div>

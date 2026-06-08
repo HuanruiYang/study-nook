@@ -144,7 +144,7 @@ export default function BookDetail() {
       {/* Tabs */}
       <div className="flex border-b border-black/10 mb-6">
         {([
-          { key: 'reviews', label: `读后感${layers.length ? ` (${layers.length})` : ''}` },
+          { key: 'reviews', label: `阅读感受${layers.length ? ` (${layers.length})` : ''}` },
           { key: 'quotes', label: `书摘${quotes.length ? ` (${quotes.length})` : ''}` },
           { key: 'sparks', label: `灵感${sparks.length ? ` (${sparks.length})` : ''}` },
         ] as { key: Tab; label: string }[]).map(t => (
@@ -162,7 +162,7 @@ export default function BookDetail() {
         <div>
           <div className="grid gap-4 mb-4">
             {layers.length === 0 && !showEditor && (
-              <p className="text-[14px] text-[#7A7468] py-4">还没有读后感，记录下第一次阅读的感受吧。</p>
+              <p className="text-[14px] text-[#7A7468] py-4">还没有阅读感受。可以先写下读之前的期待，也可以记录阅读之中的触动或读之后的回声。</p>
             )}
             {layers.slice().sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
               .map(l => (
@@ -176,7 +176,7 @@ export default function BookDetail() {
           ) : (
             <button onClick={() => setShowEditor(true)}
               className="w-full py-3 border border-dashed border-black/20 rounded-xl text-[14px] text-[#7A7468] hover:border-[#3D3A32] hover:text-[#3D3A32] transition-colors">
-              再读一遍，再写一层
+              记录一条阅读感受
             </button>
           )}
         </div>

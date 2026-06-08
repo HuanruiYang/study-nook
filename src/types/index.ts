@@ -21,6 +21,7 @@ export interface ReviewLayer {
   id: string
   user_id: string
   book_id: string
+  stage?: 'before' | 'during' | 'after'
   label: string
   color: string
   content: string
