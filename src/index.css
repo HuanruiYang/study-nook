@@ -1,0 +1,24 @@
+@import "tailwindcss";
+
+@theme {
+  --color-paper: #F5F2EB;
+  --color-oldpaper: #E8E3D8;
+  --color-ink: #3D3A32;
+  --color-smoke: #7A7468;
+  --color-ochre: #C5705A;
+  --color-indigo: #5B7FA3;
+  --color-moss: #6B8F6A;
+  --color-gold: #C4A84B;
+}
+
+body {
+  margin: 0;
+  background-color: #F5F2EB;
+  color: #3D3A32;
+  font-family: -apple-system, "PingFang SC", "Hiragino Sans GB", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100svh;
+}
