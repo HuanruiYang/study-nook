@@ -23,6 +23,31 @@ function dayTitle(date: string) {
   return new Date(date).toLocaleDateString('zh-CN', { month: 'long', day: 'numeric' })
 }
 
+function monthKey(date: Date) {
+  return date.toISOString().slice(0, 7)
+}
+
+function addMonths(date: Date, offset: number) {
+  const next = new Date(date)
+  next.setMonth(next.getMonth() + offset)
+  return next
+}
+
+function monthDeltaText(current: number, previous: number) {
+  const delta = current - previous
+  if (delta > 0) return `较上月 +${delta} ↑`
+  if (delta < 0) return `较上月 ${delta} ↓`
+  return '较上月持平'
+}
+
+function daysInMonth(date: Date) {
+  return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate()
+}
+
+function mondayFirstOffset(date: Date) {
+  return (new Date(date.getFullYear(), date.getMonth(), 1).getDay() + 6) % 7
+}
+
 export default function Shelf() {
   const { user } = useAuth()
   const location = useLocation()
@@ -61,8 +86,48 @@ export default function Shelf() {
     return [...groups.entries()]
   }, [filteredNotes])
 
-  const monthNotes = notes.filter(item => item.layer.created_at.slice(0, 7) === new Date().toISOString().slice(0, 7))
-  const monthBookCount = new Set(monthNotes.map(item => item.book.id)).size
+  const readingStats = useMemo(() => {
+    const now = new Date()
+    const currentMonth = monthKey(now)
+    const previousMonth = monthKey(addMonths(now, -1))
+    const monthNotes = notes.filter(item => item.layer.created_at.slice(0, 7) === currentMonth)
+    const previousNotes = notes.filter(item => item.layer.created_at.slice(0, 7) === previousMonth)
+    const monthBookCount = new Set(monthNotes.map(item => item.book.id)).size
+    const previousBookCount = new Set(previousNotes.map(item => item.book.id)).size
+    const dailyCounts = new Map<number, number>()
+
+    monthNotes.forEach(item => {
+      const day = new Date(item.layer.created_at).getDate()
+      dailyCounts.set(day, (dailyCounts.get(day) ?? 0) + 1)
+    })
+
+    const maxDailyCount = Math.max(1, ...dailyCounts.values())
+    const leadingEmptyDays = mondayFirstOffset(now)
+    const calendarCells = [
+      ...Array.from({ length: leadingEmptyDays }, () => null),
+      ...Array.from({ length: daysInMonth(now) }, (_, index) => index + 1),
+    ]
+
+    return {
+      monthNotes,
+      monthBookCount,
+      noteDelta: monthDeltaText(monthNotes.length, previousNotes.length),
+      bookDelta: monthDeltaText(monthBookCount, previousBookCount),
+      dailyCounts,
+      maxDailyCount,
+      calendarCells,
+    }
+  }, [notes])
+
+  function distributionColor(day: number | null) {
+    if (!day) return 'transparent'
+    const count = readingStats.dailyCounts.get(day) ?? 0
+    if (count === 0) return '#EEEAE2'
+    const ratio = count / readingStats.maxDailyCount
+    if (ratio >= 0.75) return '#3E684D'
+    if (ratio >= 0.45) return '#6F9B73'
+    return '#A8C8A6'
+  }
 
   function refresh() { setBooks(getBooks()) }
 
@@ -184,6 +249,11 @@ export default function Shelf() {
       ) : (
         <div className="grid gap-3 md:gap-8 xl:grid-cols-[1fr_300px]">
           <main className="space-y-4 md:space-y-9">
+            {noteGroups.length === 0 && (
+              <div className="warm-card rounded-[8px] p-5 text-center text-[13px] text-[#6F6A60] md:p-8 md:text-[15px]">
+                还没有匹配的阅读札记。添加书籍后进入书籍详情，就可以记录阅读思考。
+              </div>
+            )}
             {noteGroups.map(([month, items]) => (
               <section key={month}>
                 <h2 className="serif-title mb-2.5 text-[18px] font-semibold text-[#26241F] md:mb-5 md:text-[26px]">{month}</h2>
@@ -221,24 +291,30 @@ export default function Shelf() {
             <h2 className="mb-3 text-[15px] font-semibold text-[#26241F] md:mb-5 md:text-[16px]">本月阅读记录</h2>
             <div className="grid grid-cols-2 gap-3">
               <div className="rounded-[8px] bg-[#EFF4EE] p-3 md:p-4">
-                <p className="serif-title text-[28px] font-semibold text-[#3E684D] md:text-[34px]">{monthBookCount}</p>
-                <p className="text-[13px] text-[#26241F] md:text-[14px]">在读</p>
-                <p className="mt-2 text-[11px] text-[#6F6A60] md:mt-4 md:text-[12px]">较上月 +2 ↑</p>
+                <p className="serif-title text-[28px] font-semibold text-[#3E684D] md:text-[34px]">{readingStats.monthBookCount}</p>
+                <p className="text-[13px] text-[#26241F] md:text-[14px]">记录书目</p>
+                <p className="mt-2 text-[11px] text-[#6F6A60] md:mt-4 md:text-[12px]">{readingStats.bookDelta}</p>
               </div>
               <div className="rounded-[8px] bg-[#F5EFE4] p-3 md:p-4">
-                <p className="serif-title text-[28px] font-semibold text-[#6B4B2B] md:text-[34px]">{monthNotes.length}</p>
+                <p className="serif-title text-[28px] font-semibold text-[#6B4B2B] md:text-[34px]">{readingStats.monthNotes.length}</p>
                 <p className="text-[13px] text-[#26241F] md:text-[14px]">札记</p>
-                <p className="mt-2 text-[11px] text-[#6F6A60] md:mt-4 md:text-[12px]">较上月 +2 ↑</p>
+                <p className="mt-2 text-[11px] text-[#6F6A60] md:mt-4 md:text-[12px]">{readingStats.noteDelta}</p>
               </div>
             </div>
             <div className="mt-4 border-t border-[#26241F]/10 pt-4 md:mt-6 md:pt-5">
               <h3 className="mb-3 text-[14px] font-semibold text-[#26241F] md:mb-4 md:text-[15px]">本月札记分布</h3>
               <div className="grid grid-cols-7 gap-2 text-center text-[11px] text-[#6F6A60] md:gap-3 md:text-[12px]">
                 {'一二三四五六日'.split('').map(day => <span key={day}>{day}</span>)}
-                {Array.from({ length: 28 }).map((_, i) => (
-                  <span key={i} className="mx-auto h-3 w-3 rounded md:h-4 md:w-4" style={{ backgroundColor: i % 9 === 3 ? '#4E7658' : i % 7 === 2 ? '#8FB596' : '#EEEAE2' }} />
+                {readingStats.calendarCells.map((day, index) => (
+                  <span
+                    key={`${day ?? 'blank'}-${index}`}
+                    title={day ? `${day} 日：${readingStats.dailyCounts.get(day) ?? 0} 条札记` : undefined}
+                    className="mx-auto h-3 w-3 rounded md:h-4 md:w-4"
+                    style={{ backgroundColor: distributionColor(day) }}
+                  />
                 ))}
               </div>
+              <p className="mt-3 text-[11px] text-[#6F6A60]">颜色越深，表示当天记录的札记越多。</p>
             </div>
             <Link to="/year" className="mt-4 flex items-center gap-2 text-[13px] text-[#26241F] hover:text-[#3E684D] md:mt-7 md:text-[14px]">
               查看统计 <span>›</span>

@@ -7,6 +7,7 @@ const MAIN_ITEMS = [
   { to: '/shelf/time', label: '阅读札记', icon: '▣', end: true },
   { to: '/shelf/books', label: '书架', icon: '▤', end: true },
   { to: '/year', label: '统计', icon: '▥', end: true },
+  { to: '/account', label: '账号', icon: '●', end: true },
   { to: '/sparks', label: '开发笔记', icon: '</>', end: true },
 ]
 
@@ -48,7 +49,10 @@ export default function Sidebar() {
             <span className="grid h-8 w-8 place-items-center rounded-full bg-[#26241F]/16 text-[#FFFDF8]">●</span>
             <p className="truncate text-[13px] text-[#6F6A60]">{user?.email}</p>
           </div>
-          <button onClick={signOut} className="mt-4 flex items-center gap-2 text-[14px] text-[#6F6A60] hover:text-[#BC644E]">
+          <NavLink to="/account" className="mt-4 inline-flex text-[13px] text-[#3E684D] hover:text-[#26241F]">
+            管理账号
+          </NavLink>
+          <button onClick={signOut} className="mt-3 flex items-center gap-2 text-[14px] text-[#6F6A60] hover:text-[#BC644E]">
             <span>↪</span>
             退出
           </button>

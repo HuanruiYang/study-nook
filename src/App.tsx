@@ -8,6 +8,7 @@ import BookDetail from './pages/BookDetail'
 import Sparks from './pages/Sparks'
 import YearMap from './pages/YearMap'
 import ImportKindle from './pages/ImportKindle'
+import Account from './pages/Account'
 
 export default function App() {
   return (
@@ -24,6 +25,7 @@ export default function App() {
             <Route path="/book/:id" element={<BookDetail />} />
             <Route path="/sparks" element={<Sparks />} />
             <Route path="/year" element={<YearMap />} />
+            <Route path="/account" element={<Account />} />
             <Route path="/import/kindle" element={<ImportKindle />} />
           </Route>
         </Route>
