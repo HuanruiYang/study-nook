@@ -76,7 +76,7 @@ export function useAuth() {
       const sess = makeDevSession(email)
       setSession(sess)
       setUser(sess.user)
-      return { error: null }
+      return { error: null, session: sess }
     }
 
     const { data, error } = await supabase.auth.signInWithPassword({
@@ -89,7 +89,7 @@ export function useAuth() {
       setUser(data.session.user)
     }
 
-    return { error }
+    return { error, session: data.session }
   }
 
   async function signUpWithPassword(email: string, password: string) {
@@ -98,7 +98,7 @@ export function useAuth() {
       const sess = makeDevSession(email)
       setSession(sess)
       setUser(sess.user)
-      return { error: null }
+      return { error: null, session: sess }
     }
 
     const { data, error } = await supabase.auth.signUp({
@@ -111,7 +111,7 @@ export function useAuth() {
       setUser(data.session.user)
     }
 
-    return { error }
+    return { error, session: data.session }
   }
 
   async function signOut() {

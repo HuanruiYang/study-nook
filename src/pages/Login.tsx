@@ -6,6 +6,24 @@ import OpenBookLogo from '../components/OpenBookLogo'
 
 const DEV_MODE = import.meta.env.VITE_DEV_MODE === 'true' || !hasSupabaseConfig
 
+function getFriendlyAuthError(message: string) {
+  const lowerMessage = message.toLowerCase()
+
+  if (lowerMessage.includes('invalid login credentials')) {
+    return '邮箱或密码不正确。如果你刚刚注册过，可能是旧的未确认账号还在 Supabase 里，请在 Authentication > Users 删除这个邮箱后重新注册。'
+  }
+
+  if (lowerMessage.includes('user already registered')) {
+    return '这个邮箱已经注册过，请切换到“登录”；如果忘记密码，目前需要在 Supabase 后台删除该用户后重新注册。'
+  }
+
+  if (lowerMessage.includes('email not confirmed')) {
+    return '这个邮箱还没有被确认。请确认 Supabase 的 Email provider 里已经关闭 Confirm email，或删除该用户后重新注册。'
+  }
+
+  return message
+}
+
 export default function Login() {
   const { signInWithPassword, signUpWithPassword } = useAuth()
   const navigate = useNavigate()
@@ -27,14 +45,19 @@ export default function Login() {
       : await signUpWithPassword(email.trim(), password)
     setLoading(false)
 
-    const { error } = result
+    const { error, session } = result
     if (error) {
-      setError(error.message)
-    } else {
-      if (mode === 'signUp' && !DEV_MODE) {
-        setNotice('账号已创建。如果没有自动进入，请在 Supabase 后台关闭 Confirm email 后再注册/登录。')
-      }
+      setError(getFriendlyAuthError(error.message))
+    } else if (session) {
       navigate('/')
+    } else if (mode === 'signUp') {
+      setNotice('注册请求已提交，但 Supabase 没有返回登录状态。请确认 Confirm email 已关闭；如果这个邮箱是之前注册过的旧账号，请先在 Authentication > Users 删除后重新注册。')
+    } else {
+      setError('没有获得登录状态，请检查邮箱和密码后再试。')
+    }
+
+    if (mode === 'signUp' && error?.message.toLowerCase().includes('user already registered')) {
+      setMode('signIn')
     }
   }
 
