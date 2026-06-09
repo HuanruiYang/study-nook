@@ -1,0 +1,17 @@
+type OpenBookLogoProps = {
+  className?: string
+}
+
+export default function OpenBookLogo({ className = 'h-10 w-10' }: OpenBookLogoProps) {
+  return (
+    <svg className={className} viewBox="0 0 96 96" role="img" aria-label="手边书房">
+      <rect width="96" height="96" rx="24" fill="#F8F4EA" />
+      <path d="M17 27c0-5 4-9 9-8 9 1 17 4 22 10v44c-5-6-13-9-22-10-5-1-9-5-9-10V27Z" fill="#FFFDF7" />
+      <path d="M79 27c0-5-4-9-9-8-9 1-17 4-22 10v44c5-6 13-9 22-10 5-1 9-5 9-10V27Z" fill="#F2E6D2" />
+      <path d="M48 29v44" stroke="#6A5B42" strokeWidth="3" strokeLinecap="round" />
+      <path d="M26 35c6 .6 12 2.4 16 5M26 46c6 .5 12 2.2 16 4.8M26 57c5 .4 10 1.7 15 4" stroke="#8E7B5B" strokeWidth="3" strokeLinecap="round" />
+      <path d="M70 35c-6 .6-12 2.4-16 5M70 46c-6 .5-12 2.2-16 4.8M70 57c-5 .4-10 1.7-15 4" stroke="#8E7B5B" strokeWidth="3" strokeLinecap="round" />
+      <path d="M19 65c11 0 20 3 29 10 9-7 18-10 29-10" fill="none" stroke="#4F6F52" strokeWidth="4" strokeLinecap="round" />
+    </svg>
+  )
+}

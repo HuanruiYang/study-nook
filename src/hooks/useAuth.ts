@@ -7,6 +7,18 @@ const DEV_SESSION_KEY = 'shufang_dev_session'
 
 export const isDevMode = DEV_MODE
 
+function getAuthRedirectUrl() {
+  const url = new URL(window.location.href)
+  url.search = ''
+  url.hash = ''
+  return url.toString()
+}
+
+function cleanAuthRedirectUrl() {
+  const cleanUrl = `${window.location.origin}${window.location.pathname}${window.location.hash || '#/'}`
+  window.history.replaceState({}, document.title, cleanUrl)
+}
+
 function makeDevUser(email: string): User {
   return {
     id: 'dev-user-001',
@@ -40,11 +52,21 @@ export function useAuth() {
       return
     }
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    async function loadSession() {
+      const code = new URLSearchParams(window.location.search).get('code')
+      if (code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(code)
+        cleanAuthRedirectUrl()
+        if (error) console.warn('Magic link sign-in failed:', error)
+      }
+
+      const { data: { session } } = await supabase.auth.getSession()
       setSession(session)
       setUser(session?.user ?? null)
       setLoading(false)
-    })
+    }
+
+    void loadSession()
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session)
@@ -65,7 +87,7 @@ export function useAuth() {
     }
     const { error } = await supabase.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: `${window.location.origin}${window.location.pathname}` },
+      options: { emailRedirectTo: getAuthRedirectUrl() },
     })
     return { error }
   }

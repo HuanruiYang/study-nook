@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="手边书房">
-  <rect width="512" height="512" rx="112" fill="#f8f4ea"/>
-  <path d="M145 112h173c30 0 54 24 54 54v234H186c-39 0-71-32-71-71V142c0-17 13-30 30-30Z" fill="#1f2a24"/>
-  <path d="M169 141h143c18 0 32 14 32 32v195H190c-25 0-46-21-46-46V166c0-14 11-25 25-25Z" fill="#fffaf0"/>
-  <path d="M194 192h101" stroke="#4f6f52" stroke-width="18" stroke-linecap="round"/>
-  <path d="M194 246h85" stroke="#d46a4c" stroke-width="18" stroke-linecap="round"/>
-  <path d="M194 300h116" stroke="#4b7aa6" stroke-width="18" stroke-linecap="round"/>
-  <path d="M350 166v229l-41-29-41 29V166c0-13 11-24 24-24h34c13 0 24 11 24 24Z" fill="#d8a241"/>
+  <rect width="512" height="512" rx="112" fill="#F8F4EA"/>
+  <path d="M91 144c0-27 21-47 48-43 48 5 87 20 117 51v235c-30-31-69-46-117-51-27-3-48-25-48-53V144Z" fill="#FFFDF7"/>
+  <path d="M421 144c0-27-21-47-48-43-48 5-87 20-117 51v235c30-31 69-46 117-51 27-3 48-25 48-53V144Z" fill="#F2E6D2"/>
+  <path d="M256 152v235" stroke="#6A5B42" stroke-width="18" stroke-linecap="round"/>
+  <path d="M139 185c35 3 65 13 91 29M139 244c35 3 64 12 91 27M139 303c30 3 58 10 84 23" stroke="#8E7B5B" stroke-width="17" stroke-linecap="round"/>
+  <path d="M373 185c-35 3-65 13-91 29M373 244c-35 3-64 12-91 27M373 303c-30 3-58 10-84 23" stroke="#8E7B5B" stroke-width="17" stroke-linecap="round"/>
+  <path d="M102 346c60 0 108 17 154 54 46-37 94-54 154-54" fill="none" stroke="#4F6F52" stroke-width="22" stroke-linecap="round"/>
 </svg>

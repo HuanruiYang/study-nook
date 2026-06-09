@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
+import OpenBookLogo from '../OpenBookLogo'
 
 const MAIN_ITEMS = [
   { to: '/', label: '阅读随感', icon: '⌂', end: true },
@@ -16,7 +17,7 @@ export default function Sidebar() {
     <aside className="hidden md:flex fixed left-0 top-0 z-20 h-full w-[260px] flex-col border-r border-[#26241F]/10 bg-[#FFFDF8]/72 backdrop-blur-xl">
       <div className="px-7 pb-9 pt-8">
         <div className="flex items-center gap-3">
-          <span className="text-[30px] leading-none text-[#7B6F55]">▱</span>
+          <OpenBookLogo className="h-10 w-10 shadow-sm" />
           <h1 className="serif-title text-[24px] font-semibold tracking-wide text-[#26241F]">手边书房</h1>
         </div>
       </div>

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { hasSupabaseConfig } from '../lib/supabase'
+import OpenBookLogo from '../components/OpenBookLogo'
 
 const DEV_MODE = import.meta.env.VITE_DEV_MODE === 'true' || !hasSupabaseConfig
 
@@ -30,35 +31,23 @@ export default function Login() {
   }
 
   return (
-    <div className="app-shell flex min-h-svh items-center justify-center px-4 py-8">
-      <div className="grid w-full max-w-5xl overflow-hidden rounded-[8px] border border-[#312F2A]/12 bg-[#FBF8F1]/74 shadow-[0_24px_70px_rgba(49,47,42,0.14)] backdrop-blur md:grid-cols-[1.08fr_0.92fr]">
-        <section className="relative min-h-[420px] overflow-hidden bg-[#312F2A] p-8 text-[#FBF8F1] md:p-10">
-          <div className="absolute inset-x-10 bottom-0 top-28 flex items-end justify-center opacity-95">
-            <div className="flex items-end gap-3">
-              {[
-                ['#BC644E', 190, '札记'],
-                ['#496F8E', 250, '阅读'],
-                ['#5F8265', 215, '灵感'],
-                ['#B7963E', 178, '回声'],
-              ].map(([color, height, label]) => (
-                <div
-                  key={String(color)}
-                  className="book-shadow flex w-14 items-end rounded-t-[7px] px-2 pb-4 text-center"
-                  style={{ height: Number(height), backgroundColor: String(color) }}
-                >
-                  <span className="serif-title w-full text-[13px] leading-tight">{label}</span>
-                </div>
-              ))}
-            </div>
+    <div className="login-shell flex min-h-svh items-center justify-center px-4 py-8">
+      <div className="grid w-full max-w-5xl overflow-hidden rounded-[8px] border border-[#6B7D6C]/14 bg-[#FFFDF8]/82 shadow-[0_24px_70px_rgba(88,75,55,0.12)] backdrop-blur md:grid-cols-[1.04fr_0.96fr]">
+        <section className="relative min-h-[380px] overflow-hidden bg-[#EEF3E8] p-8 text-[#312F2A] md:p-10">
+          <div className="absolute inset-x-5 bottom-4 flex justify-center opacity-95 md:bottom-8">
+            <svg className="h-56 w-full max-w-[390px]" viewBox="0 0 420 250" role="img" aria-label="摊开的书">
+              <path d="M30 76c0-17 13-29 30-27 61 5 105 26 150 63v105c-43-33-88-51-150-56-17-1-30-15-30-32V76Z" fill="#FFFDF8" stroke="#D8CBB8" strokeWidth="3" />
+              <path d="M390 76c0-17-13-29-30-27-61 5-105 26-150 63v105c43-33 88-51 150-56 17-1 30-15 30-32V76Z" fill="#F6ECDA" stroke="#D8CBB8" strokeWidth="3" />
+              <path d="M210 112v105" stroke="#9E8B6E" strokeWidth="4" strokeLinecap="round" />
+              <path d="M72 93c39 4 74 15 105 34M72 124c38 4 72 14 105 31M72 155c33 4 65 12 97 27" stroke="#9B8A72" strokeWidth="6" strokeLinecap="round" opacity=".78" />
+              <path d="M348 93c-39 4-74 15-105 34M348 124c-38 4-72 14-105 31M348 155c-33 4-65 12-97 27" stroke="#9B8A72" strokeWidth="6" strokeLinecap="round" opacity=".78" />
+              <path d="M44 183c68 2 119 16 166 48 47-32 98-46 166-48" fill="none" stroke="#5F8265" strokeWidth="7" strokeLinecap="round" />
+            </svg>
           </div>
           <div className="relative z-10">
-            <div className="mb-5 flex gap-1">
-              {['#BC644E', '#496F8E', '#5F8265', '#B7963E'].map(c => (
-                <div key={c} className="h-8 w-2 rounded-sm" style={{ backgroundColor: c }} />
-              ))}
-            </div>
+            <OpenBookLogo className="mb-5 h-14 w-14 shadow-sm" />
             <h1 className="serif-title text-[34px] font-semibold leading-tight md:text-[44px]">手边书房</h1>
-            <p className="mt-3 max-w-sm text-[14px] leading-relaxed text-[#FBF8F1]/72">
+            <p className="mt-3 max-w-sm text-[14px] leading-relaxed text-[#5F6258]">
               把书目、书摘、感受和一闪而过的想法，收进同一个可同步的阅读档案。
             </p>
           </div>
