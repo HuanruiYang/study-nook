@@ -5,6 +5,8 @@ import { hasSupabaseConfig, supabase } from '../lib/supabase'
 const DEV_MODE = import.meta.env.VITE_DEV_MODE === 'true' || !hasSupabaseConfig
 const DEV_SESSION_KEY = 'shufang_dev_session'
 
+export const isDevMode = DEV_MODE
+
 function makeDevUser(email: string): User {
   return {
     id: 'dev-user-001',
@@ -63,7 +65,7 @@ export function useAuth() {
     }
     const { error } = await supabase.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: window.location.origin },
+      options: { emailRedirectTo: `${window.location.origin}${window.location.pathname}` },
     })
     return { error }
   }

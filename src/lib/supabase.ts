@@ -4,10 +4,10 @@ import type { Book, ReviewLayer, Quote, Spark } from '../types'
 export type Database = {
   public: {
     Tables: {
-      books: { Row: Book; Insert: Omit<Book, 'id' | 'created_at' | 'updated_at'>; Update: Partial<Book> }
-      review_layers: { Row: ReviewLayer; Insert: Omit<ReviewLayer, 'id' | 'created_at'>; Update: Partial<ReviewLayer> }
-      quotes: { Row: Quote; Insert: Omit<Quote, 'id' | 'created_at'>; Update: Partial<Quote> }
-      sparks: { Row: Spark; Insert: Omit<Spark, 'id' | 'created_at'>; Update: Partial<Spark> }
+      books: { Row: Book; Insert: Book; Update: Partial<Book> }
+      review_layers: { Row: ReviewLayer; Insert: ReviewLayer; Update: Partial<ReviewLayer> }
+      quotes: { Row: Quote; Insert: Quote; Update: Partial<Quote> }
+      sparks: { Row: Spark; Insert: Spark; Update: Partial<Spark> }
     }
   }
 }

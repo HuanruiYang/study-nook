@@ -1,4 +1,5 @@
 import type { Book, ReviewLayer, Quote, Spark } from '../types'
+import { hasSupabaseConfig, supabase, type Database } from './supabase'
 
 const KEYS = {
   books: 'shufang_books',
@@ -7,7 +8,23 @@ const KEYS = {
   sparks: 'shufang_sparks',
 }
 
-function load<T>(key: string): T[] {
+const ACTIVE_USER_KEY = 'shufang_active_user'
+const LEGACY_MIGRATED_KEY = 'shufang_legacy_migrated'
+const DEV_MODE = import.meta.env.VITE_DEV_MODE === 'true' || !hasSupabaseConfig
+
+type TableName = keyof Database['public']['Tables']
+type TableRow<T extends TableName> = Database['public']['Tables'][T]['Row']
+
+function activeUserId() {
+  return localStorage.getItem(ACTIVE_USER_KEY)
+}
+
+function scopedKey(key: string) {
+  const userId = activeUserId()
+  return userId ? `${key}:${userId}` : key
+}
+
+function rawLoad<T>(key: string): T[] {
   try {
     return JSON.parse(localStorage.getItem(key) ?? '[]')
   } catch {
@@ -15,8 +32,127 @@ function load<T>(key: string): T[] {
   }
 }
 
-function save<T>(key: string, items: T[]) {
+function rawSave<T>(key: string, items: T[]) {
   localStorage.setItem(key, JSON.stringify(items))
+}
+
+function load<T>(key: string): T[] {
+  return rawLoad<T>(scopedKey(key))
+}
+
+function save<T>(key: string, items: T[]) {
+  rawSave(scopedKey(key), items)
+}
+
+function cloudEnabled() {
+  return Boolean(activeUserId() && hasSupabaseConfig && !DEV_MODE)
+}
+
+async function upsertRemote<T extends TableName>(table: T, item: TableRow<T>) {
+  if (!cloudEnabled()) return
+  const { error } = await supabase.from(table).upsert(item as never)
+  if (error) console.warn(`[sync] Failed to upsert ${table}`, error)
+}
+
+async function upsertRemoteMany<T extends TableName>(table: T, items: TableRow<T>[]) {
+  if (!cloudEnabled() || items.length === 0) return
+  const { error } = await supabase.from(table).upsert(items as never)
+  if (error) console.warn(`[sync] Failed to upsert ${table}`, error)
+}
+
+async function deleteRemote(table: TableName, id: string) {
+  if (!cloudEnabled()) return
+  const { error } = await supabase.from(table).delete().eq('id', id)
+  if (error) console.warn(`[sync] Failed to delete ${table}`, error)
+}
+
+async function deleteRemoteWhere(table: TableName, field: string, value: string) {
+  if (!cloudEnabled()) return
+  const { error } = await supabase.from(table).delete().eq(field, value)
+  if (error) console.warn(`[sync] Failed to delete ${table}`, error)
+}
+
+function mergeById<T extends { id: string }>(
+  localItems: T[],
+  remoteItems: T[],
+  newerValue?: (item: T) => string | undefined
+) {
+  const map = new Map<string, T>()
+  for (const item of localItems) map.set(item.id, item)
+  for (const item of remoteItems) {
+    const existing = map.get(item.id)
+    if (!existing) {
+      map.set(item.id, item)
+      continue
+    }
+    if (!newerValue) {
+      map.set(item.id, item)
+      continue
+    }
+    const existingTime = new Date(newerValue(existing) ?? 0).getTime()
+    const remoteTime = new Date(newerValue(item) ?? 0).getTime()
+    map.set(item.id, remoteTime >= existingTime ? item : existing)
+  }
+  return [...map.values()]
+}
+
+function migrateLegacyData(userId: string) {
+  if (localStorage.getItem(LEGACY_MIGRATED_KEY)) return
+  for (const key of Object.values(KEYS)) {
+    const legacyItems = rawLoad<unknown>(key)
+    const nextKey = `${key}:${userId}`
+    if (legacyItems.length > 0 && rawLoad<unknown>(nextKey).length === 0) {
+      rawSave(nextKey, legacyItems)
+    }
+  }
+  localStorage.setItem(LEGACY_MIGRATED_KEY, userId)
+}
+
+export function setActiveLibraryUser(userId: string | null) {
+  if (userId) {
+    localStorage.setItem(ACTIVE_USER_KEY, userId)
+    migrateLegacyData(userId)
+  } else {
+    localStorage.removeItem(ACTIVE_USER_KEY)
+  }
+}
+
+export async function syncCloudLibrary(userId: string) {
+  setActiveLibraryUser(userId)
+  if (!cloudEnabled()) return
+
+  try {
+    const [booksRes, reviewsRes, quotesRes, sparksRes] = await Promise.all([
+      supabase.from('books').select('*').eq('user_id', userId),
+      supabase.from('review_layers').select('*').eq('user_id', userId),
+      supabase.from('quotes').select('*').eq('user_id', userId),
+      supabase.from('sparks').select('*').eq('user_id', userId),
+    ])
+
+    const results = [booksRes, reviewsRes, quotesRes, sparksRes]
+    const firstError = results.find(res => res.error)?.error
+    if (firstError) throw firstError
+
+    const mergedBooks = mergeById(load<Book>(KEYS.books), booksRes.data ?? [], item => item.updated_at)
+    const mergedReviews = mergeById(load<ReviewLayer>(KEYS.reviews), reviewsRes.data ?? [], item => item.created_at)
+    const mergedQuotes = mergeById(load<Quote>(KEYS.quotes), quotesRes.data ?? [], item => item.created_at)
+    const mergedSparks = mergeById(load<Spark>(KEYS.sparks), sparksRes.data ?? [], item => item.created_at)
+
+    save(KEYS.books, mergedBooks)
+    save(KEYS.reviews, mergedReviews)
+    save(KEYS.quotes, mergedQuotes)
+    save(KEYS.sparks, mergedSparks)
+
+    await Promise.all([
+      upsertRemoteMany('books', mergedBooks),
+      upsertRemoteMany('review_layers', mergedReviews),
+      upsertRemoteMany('quotes', mergedQuotes),
+      upsertRemoteMany('sparks', mergedSparks),
+    ])
+  } catch (error) {
+    console.warn('[sync] Failed to sync cloud library', error)
+    throw error
+  }
 }
 
 // ── Books ──────────────────────────────────────────────────────────────────
@@ -214,6 +350,7 @@ export function saveBook(book: Book) {
   if (idx >= 0) books[idx] = book
   else books.unshift(book)
   save(KEYS.books, books)
+  void upsertRemote('books', book)
 }
 
 export function deleteBook(id: string) {
@@ -221,6 +358,12 @@ export function deleteBook(id: string) {
   save(KEYS.reviews, load<ReviewLayer>(KEYS.reviews).filter(r => r.book_id !== id))
   save(KEYS.quotes, load<Quote>(KEYS.quotes).filter(q => q.book_id !== id))
   save(KEYS.sparks, load<Spark>(KEYS.sparks).filter(s => s.book_id !== id))
+  void Promise.all([
+    deleteRemoteWhere('review_layers', 'book_id', id),
+    deleteRemoteWhere('quotes', 'book_id', id),
+    deleteRemoteWhere('sparks', 'book_id', id),
+    deleteRemote('books', id),
+  ])
 }
 
 // ── Review Layers ──────────────────────────────────────────────────────────
@@ -235,10 +378,12 @@ export function saveReviewLayer(layer: ReviewLayer) {
   if (idx >= 0) layers[idx] = layer
   else layers.push(layer)
   save(KEYS.reviews, layers)
+  void upsertRemote('review_layers', layer)
 }
 
 export function deleteReviewLayer(id: string) {
   save(KEYS.reviews, load<ReviewLayer>(KEYS.reviews).filter(r => r.id !== id))
+  void deleteRemote('review_layers', id)
 }
 
 // ── Quotes ─────────────────────────────────────────────────────────────────
@@ -255,25 +400,30 @@ export function saveQuote(quote: Quote) {
   if (idx >= 0) quotes[idx] = quote
   else quotes.push(quote)
   save(KEYS.quotes, quotes)
+  void upsertRemote('quotes', quote)
 }
 
 export function importQuotes(quotes: Quote[]): { imported: number; skipped: number } {
   const existing = load<Quote>(KEYS.quotes)
   const existingContents = new Set(existing.map(q => q.content))
+  const importedQuotes: Quote[] = []
   let imported = 0
   let skipped = 0
   for (const q of quotes) {
     if (existingContents.has(q.content)) { skipped++; continue }
     existing.push(q)
     existingContents.add(q.content)
+    importedQuotes.push(q)
     imported++
   }
   save(KEYS.quotes, existing)
+  void upsertRemoteMany('quotes', importedQuotes)
   return { imported, skipped }
 }
 
 export function deleteQuote(id: string) {
   save(KEYS.quotes, load<Quote>(KEYS.quotes).filter(q => q.id !== id))
+  void deleteRemote('quotes', id)
 }
 
 // ── Sparks ─────────────────────────────────────────────────────────────────
@@ -296,8 +446,10 @@ export function saveSpark(spark: Spark) {
   if (idx >= 0) sparks[idx] = spark
   else sparks.push(spark)
   save(KEYS.sparks, sparks)
+  void upsertRemote('sparks', spark)
 }
 
 export function deleteSpark(id: string) {
   save(KEYS.sparks, load<Spark>(KEYS.sparks).filter(s => s.id !== id))
+  void deleteRemote('sparks', id)
 }

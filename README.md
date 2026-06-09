@@ -64,7 +64,15 @@ VITE_SUPABASE_ANON_KEY=你的 Supabase anon key
 VITE_DEV_MODE=false
 ```
 
-注意：当前页面的数据读写仍以 `localStorage` 为主。Supabase 登录已经接入，但云端数据库读写需要继续补充数据表和数据层逻辑。
+云端同步已经接入：页面会先使用本机缓存保持快速响应，登录后从 Supabase 拉取书目、阅读感受、书摘和灵感碎片；新增、编辑、删除会同步写回云端，从而支持多端使用。
+
+首次配置 Supabase 时，需要在 Supabase 的 SQL Editor 中执行：
+
+```text
+supabase/schema.sql
+```
+
+同时在 Supabase Auth 的 URL Configuration 中，把你的线上域名加入 `Site URL` / `Redirect URLs`，否则邮件登录链接可能无法正确返回应用。
 
 ## 不要上传到 GitHub 的内容
 

@@ -59,7 +59,7 @@ export default function Login() {
             </div>
             <h1 className="serif-title text-[34px] font-semibold leading-tight md:text-[44px]">手边书房</h1>
             <p className="mt-3 max-w-sm text-[14px] leading-relaxed text-[#FBF8F1]/72">
-              把书目、书摘、感受和一闪而过的想法，收进同一个安静的阅读档案。
+              把书目、书摘、感受和一闪而过的想法，收进同一个可同步的阅读档案。
             </p>
           </div>
         </section>
@@ -71,6 +71,11 @@ export default function Login() {
             {DEV_MODE && (
               <p className="mt-2 inline-flex rounded-full bg-[#B7963E]/12 px-3 py-1 text-[11px] text-[#8C6B1D]">
                 开发预览 · 默认邮箱可直接进入
+              </p>
+            )}
+            {!DEV_MODE && (
+              <p className="mt-2 text-[12px] text-[#746E62]">
+                使用邮箱登录后，书目和札记会在多台设备间同步。
               </p>
             )}
           </div>
