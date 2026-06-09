@@ -7,47 +7,41 @@ import OpenBookLogo from '../components/OpenBookLogo'
 const DEV_MODE = import.meta.env.VITE_DEV_MODE === 'true' || !hasSupabaseConfig
 
 export default function Login() {
-  const { sendLoginCode, verifyLoginCode } = useAuth()
+  const { signInWithPassword, signUpWithPassword } = useAuth()
   const navigate = useNavigate()
   const [email, setEmail] = useState('reader@example.com')
-  const [code, setCode] = useState('')
-  const [sent, setSent] = useState(false)
+  const [password, setPassword] = useState('')
+  const [mode, setMode] = useState<'signIn' | 'signUp'>('signIn')
   const [loading, setLoading] = useState(false)
-  const [verifying, setVerifying] = useState(false)
   const [error, setError] = useState('')
+  const [notice, setNotice] = useState('')
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!email.trim()) return
+    if (!email.trim() || password.length < 6) return
     setLoading(true)
     setError('')
-    const { error } = await sendLoginCode(email.trim())
+    setNotice('')
+    const result = mode === 'signIn'
+      ? await signInWithPassword(email.trim(), password)
+      : await signUpWithPassword(email.trim(), password)
     setLoading(false)
-    if (error) {
-      setError(error.message)
-    } else {
-      setCode('')
-      setSent(true)
-    }
-  }
 
-  async function handleVerify(e: React.FormEvent) {
-    e.preventDefault()
-    const cleanCode = code.replace(/\D/g, '')
-    if (!email.trim() || cleanCode.length < 6) return
-    setVerifying(true)
-    setError('')
-    const { error } = await verifyLoginCode(email.trim(), cleanCode)
-    setVerifying(false)
+    const { error } = result
     if (error) {
       setError(error.message)
     } else {
+      if (mode === 'signUp' && !DEV_MODE) {
+        setNotice('账号已创建。如果没有自动进入，请在 Supabase 后台关闭 Confirm email 后再注册/登录。')
+      }
       navigate('/')
     }
   }
 
-  function handleCodeChange(value: string) {
-    setCode(value.replace(/\D/g, '').slice(0, 6))
+  function switchMode(nextMode: 'signIn' | 'signUp') {
+    setMode(nextMode)
+    setError('')
+    setNotice('')
   }
 
   return (
@@ -79,83 +73,74 @@ export default function Login() {
             <h2 className="serif-title text-[28px] font-semibold text-[#312F2A]">进入你的书房</h2>
             {DEV_MODE && (
               <p className="mt-2 inline-flex rounded-full bg-[#B7963E]/12 px-3 py-1 text-[11px] text-[#8C6B1D]">
-                开发预览 · 验证码 123456
+                开发预览 · 任意密码可进入
               </p>
             )}
             {!DEV_MODE && (
               <p className="mt-2 text-[12px] text-[#746E62]">
-                使用邮箱验证码登录后，书目和札记会在多台设备间同步。
+                使用邮箱和密码登录后，书目和札记会在多台设备间同步。
               </p>
             )}
           </div>
 
-          {sent ? (
-            <form onSubmit={handleVerify} className="space-y-4">
-              <div className="paper-card rounded-[8px] p-5">
-                <p className="serif-title text-[20px] font-semibold text-[#312F2A]">验证码已发送</p>
-                <p className="mt-2 text-[13px] leading-relaxed text-[#746E62]">
-                  请查看 {email} 收到的 6 位验证码，并在下方输入。
-                </p>
-              </div>
+          <div className="mb-5 grid grid-cols-2 rounded-[8px] border border-[#312F2A]/10 bg-[#F4EFE4]/60 p-1">
+            <button
+              type="button"
+              onClick={() => switchMode('signIn')}
+              className={`rounded-[7px] py-2 text-[13px] transition-colors ${
+                mode === 'signIn' ? 'bg-[#312F2A] text-[#FFFDF8]' : 'text-[#746E62]'
+              }`}
+            >
+              登录
+            </button>
+            <button
+              type="button"
+              onClick={() => switchMode('signUp')}
+              className={`rounded-[7px] py-2 text-[13px] transition-colors ${
+                mode === 'signUp' ? 'bg-[#312F2A] text-[#FFFDF8]' : 'text-[#746E62]'
+              }`}
+            >
+              注册
+            </button>
+          </div>
 
-              <label className="block">
-                <span className="mb-2 block text-[12px] font-medium text-[#746E62]">验证码</span>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  autoComplete="one-time-code"
-                  value={code}
-                  onChange={e => handleCodeChange(e.target.value)}
-                  placeholder="123456"
-                  required
-                  className="field w-full rounded-[8px] px-3 py-3 text-center text-[22px] tracking-[0.28em] placeholder-[#746E62]/35"
-                />
-              </label>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <label className="block">
+              <span className="mb-2 block text-[12px] font-medium text-[#746E62]">邮箱地址</span>
+              <input
+                type="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                placeholder="your@email.com"
+                required
+                className="field w-full rounded-[8px] px-3 py-3 text-[15px] placeholder-[#746E62]/60"
+              />
+            </label>
 
-              {error && <p className="text-[12px] text-[#BC644E]">{error}</p>}
+            <label className="block">
+              <span className="mb-2 block text-[12px] font-medium text-[#746E62]">密码</span>
+              <input
+                type="password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                placeholder="至少 6 位"
+                minLength={6}
+                required
+                className="field w-full rounded-[8px] px-3 py-3 text-[15px] placeholder-[#746E62]/60"
+              />
+            </label>
 
-              <button
-                type="submit"
-                disabled={verifying || code.length < 6}
-                className="ink-button w-full rounded-[8px] py-3 text-[14px] font-medium transition-colors disabled:opacity-40"
-              >
-                {verifying ? '验证中…' : '验证并登录'}
-              </button>
+            {notice && <p className="rounded-[8px] bg-[#5F8265]/10 px-3 py-2 text-[12px] leading-relaxed text-[#4F6F52]">{notice}</p>}
+            {error && <p className="text-[12px] text-[#BC644E]">{error}</p>}
 
-              <button
-                type="button"
-                onClick={() => {
-                  setSent(false)
-                  setError('')
-                }}
-                className="ghost-button w-full rounded-[8px] py-3 text-[13px]"
-              >
-                换邮箱或重新发送
-              </button>
-            </form>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <label className="block">
-                <span className="mb-2 block text-[12px] font-medium text-[#746E62]">邮箱地址</span>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={e => setEmail(e.target.value)}
-                  placeholder="your@email.com"
-                  required
-                  className="field w-full rounded-[8px] px-3 py-3 text-[15px] placeholder-[#746E62]/60"
-                />
-              </label>
-              {error && <p className="text-[12px] text-[#BC644E]">{error}</p>}
-              <button
-                type="submit"
-                disabled={loading || !email.trim()}
-                className="ink-button w-full rounded-[8px] py-3 text-[14px] font-medium transition-colors disabled:opacity-40"
-              >
-                {loading ? '发送中…' : '发送验证码'}
-              </button>
-            </form>
-          )}
+            <button
+              type="submit"
+              disabled={loading || !email.trim() || password.length < 6}
+              className="ink-button w-full rounded-[8px] py-3 text-[14px] font-medium transition-colors disabled:opacity-40"
+            >
+              {loading ? '处理中…' : mode === 'signIn' ? '登录书房' : '创建账号'}
+            </button>
+          </form>
         </section>
       </div>
     </div>
