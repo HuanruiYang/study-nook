@@ -1,0 +1,19 @@
+{
+  "name": "手边书房",
+  "short_name": "手边书房",
+  "description": "记录阅读、摘录、批注与灵感的随身书房。",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f8f4ea",
+  "theme_color": "#f8f4ea",
+  "icons": [
+    {
+      "src": "./app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

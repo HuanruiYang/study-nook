@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="手边书房">
+  <rect width="512" height="512" rx="112" fill="#f8f4ea"/>
+  <path d="M145 112h173c30 0 54 24 54 54v234H186c-39 0-71-32-71-71V142c0-17 13-30 30-30Z" fill="#1f2a24"/>
+  <path d="M169 141h143c18 0 32 14 32 32v195H190c-25 0-46-21-46-46V166c0-14 11-25 25-25Z" fill="#fffaf0"/>
+  <path d="M194 192h101" stroke="#4f6f52" stroke-width="18" stroke-linecap="round"/>
+  <path d="M194 246h85" stroke="#d46a4c" stroke-width="18" stroke-linecap="round"/>
+  <path d="M194 300h116" stroke="#4b7aa6" stroke-width="18" stroke-linecap="round"/>
+  <path d="M350 166v229l-41-29-41 29V166c0-13 11-24 24-24h34c13 0 24 11 24 24Z" fill="#d8a241"/>
+</svg>
