@@ -147,8 +147,16 @@ button:disabled {
   overflow: hidden;
 }
 
-.login-submit-button:disabled {
+.login-submit-button[aria-disabled="true"] {
   background: linear-gradient(180deg, #4E7658, #3E684D);
+  color: #FFFDF8;
+  opacity: 0.62;
+  pointer-events: none;
+}
+
+.login-submit-button[aria-busy="true"] {
+  opacity: 1;
+  cursor: wait;
 }
 
 .dark-button {

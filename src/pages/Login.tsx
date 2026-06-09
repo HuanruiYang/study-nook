@@ -33,10 +33,11 @@ export default function Login() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
+  const canSubmit = email.trim().length > 0 && password.length >= 6
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!email.trim() || password.length < 6) return
+    if (loading || !canSubmit) return
     setLoading(true)
     setError('')
     setNotice('')
@@ -158,8 +159,9 @@ export default function Login() {
 
             <button
               type="submit"
-              disabled={loading || !email.trim() || password.length < 6}
-              className="ink-button login-submit-button w-full rounded-[8px] py-3 text-[14px] font-medium transition-colors disabled:opacity-100"
+              aria-disabled={loading || !canSubmit}
+              aria-busy={loading}
+              className="ink-button login-submit-button w-full rounded-[8px] py-3 text-[14px] font-medium transition-colors"
             >
               <span className="inline-flex min-h-5 items-center justify-center">
                 {loading ? '处理中...' : mode === 'signIn' ? '登录书房' : '创建账号'}

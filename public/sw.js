@@ -1,4 +1,4 @@
-const CACHE_NAME = 'study-nook-shell-v5'
+const CACHE_NAME = 'study-nook-shell-v6'
 const SHELL_URLS = ['./', './index.html', './manifest.webmanifest', './favicon.svg', './app-icon.svg']
 
 self.addEventListener('install', event => {
