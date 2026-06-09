@@ -28,6 +28,11 @@
   box-sizing: border-box;
 }
 
+html {
+  min-height: 100%;
+  background: #F4F0E7;
+}
+
 body {
   margin: 0;
   background: var(--paper);
@@ -38,6 +43,7 @@ body {
 
 #root {
   min-height: 100svh;
+  background: #F4F0E7;
 }
 
 button,
@@ -143,21 +149,6 @@ button:disabled {
 
 .login-submit-button:disabled {
   background: linear-gradient(180deg, #4E7658, #3E684D);
-}
-
-.login-spinner {
-  width: 14px;
-  height: 14px;
-  border: 2px solid rgba(255, 253, 248, 0.38);
-  border-top-color: #FFFDF8;
-  border-radius: 999px;
-  animation: login-spin 0.75s linear infinite;
-}
-
-@keyframes login-spin {
-  to {
-    transform: rotate(360deg);
-  }
 }
 
 .dark-button {

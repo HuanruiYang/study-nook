@@ -159,11 +159,10 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading || !email.trim() || password.length < 6}
-              className="ink-button login-submit-button w-full rounded-[8px] py-3 text-[14px] font-medium transition-colors disabled:opacity-60"
+              className="ink-button login-submit-button w-full rounded-[8px] py-3 text-[14px] font-medium transition-colors disabled:opacity-100"
             >
-              <span className="inline-flex min-h-5 items-center justify-center gap-2">
-                {loading && <span className="login-spinner" aria-hidden="true" />}
-                {loading ? '处理中' : mode === 'signIn' ? '登录书房' : '创建账号'}
+              <span className="inline-flex min-h-5 items-center justify-center">
+                {loading ? '处理中...' : mode === 'signIn' ? '登录书房' : '创建账号'}
               </span>
             </button>
           </form>
