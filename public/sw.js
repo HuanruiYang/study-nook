@@ -1,4 +1,4 @@
-const CACHE_NAME = 'study-nook-shell-v1'
+const CACHE_NAME = 'study-nook-shell-v2'
 const SHELL_URLS = ['./', './index.html', './manifest.webmanifest', './favicon.svg', './app-icon.svg']
 
 self.addEventListener('install', event => {
@@ -28,15 +28,14 @@ self.addEventListener('fetch', event => {
     return
   }
 
-  event.respondWith(
-    caches.match(request).then(cached => {
-      if (cached) return cached
-      return fetch(request).then(response => {
-        if (!response.ok) return response
-        const copy = response.clone()
-        caches.open(CACHE_NAME).then(cache => cache.put(request, copy))
-        return response
-      })
-    }),
-  )
+  event.respondWith(fetchAndCache(request).catch(() => caches.match(request)))
 })
+
+async function fetchAndCache(request) {
+  const response = await fetch(request)
+  if (response.ok) {
+    const cache = await caches.open(CACHE_NAME)
+    await cache.put(request, response.clone())
+  }
+  return response
+}
