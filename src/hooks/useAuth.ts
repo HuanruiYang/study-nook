@@ -77,18 +77,38 @@ export function useAuth() {
     return () => subscription.unsubscribe()
   }, [])
 
-  async function signInWithMagicLink(email: string) {
+  async function sendLoginCode(email: string) {
     if (DEV_MODE) {
-      localStorage.setItem(DEV_SESSION_KEY, email)
-      const sess = makeDevSession(email)
-      setSession(sess)
-      setUser(sess.user)
       return { error: null }
     }
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: { emailRedirectTo: getAuthRedirectUrl() },
     })
+    return { error }
+  }
+
+  async function verifyLoginCode(email: string, token: string) {
+    if (DEV_MODE) {
+      if (token !== '123456') return { error: new Error('验证码不正确，开发预览验证码为 123456。') }
+      localStorage.setItem(DEV_SESSION_KEY, email)
+      const sess = makeDevSession(email)
+      setSession(sess)
+      setUser(sess.user)
+      return { error: null }
+    }
+
+    const { data, error } = await supabase.auth.verifyOtp({
+      email,
+      token,
+      type: 'email',
+    })
+
+    if (data.session) {
+      setSession(data.session)
+      setUser(data.session.user)
+    }
+
     return { error }
   }
 
@@ -102,5 +122,5 @@ export function useAuth() {
     await supabase.auth.signOut()
   }
 
-  return { user, session, loading, signInWithMagicLink, signOut }
+  return { user, session, loading, sendLoginCode, verifyLoginCode, signOut }
 }
