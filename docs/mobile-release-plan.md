@@ -33,6 +33,23 @@ https://huanruiyang.github.io/study-nook/
 
 推荐用 Capacitor 包住当前 React/Vite 应用。它可以复用现有前端代码、Supabase 登录和云同步逻辑。
 
+当前仓库已经加入 Android Capacitor 项目和 GitHub Actions 打包流程。推送到 `main` 后，GitHub 会运行 `Build Android APK` workflow，并生成一个调试安装包：
+
+```text
+study-nook-debug-apk / app-debug.apk
+```
+
+下载方式：
+
+1. 打开 GitHub 仓库。
+2. 进入 `Actions`。
+3. 点击最新的 `Build Android APK` 运行记录。
+4. 在页面底部 `Artifacts` 下载 `study-nook-debug-apk`。
+5. 解压后得到 `app-debug.apk`。
+6. 把 APK 发到安卓手机，允许“安装未知来源应用”后安装。
+
+这个 APK 是调试版，适合自己测试，不适合作为正式上架包。正式发布需要生成 release APK/AAB 并签名。
+
 后续需要在本机安装移动端工具链：
 
 - Android：Android Studio、JDK、Android SDK

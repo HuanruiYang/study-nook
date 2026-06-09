@@ -47,6 +47,9 @@ textarea {
 }
 
 button {
+  appearance: none;
+  -webkit-appearance: none;
+  -webkit-tap-highlight-color: transparent;
   cursor: pointer;
 }
 
@@ -129,6 +132,32 @@ button:disabled {
 
 .ink-button:hover {
   background: linear-gradient(180deg, #5B8364, #456F52);
+}
+
+.login-submit-button {
+  display: grid;
+  place-items: center;
+  min-height: 48px;
+  overflow: hidden;
+}
+
+.login-submit-button:disabled {
+  background: linear-gradient(180deg, #4E7658, #3E684D);
+}
+
+.login-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 253, 248, 0.38);
+  border-top-color: #FFFDF8;
+  border-radius: 999px;
+  animation: login-spin 0.75s linear infinite;
+}
+
+@keyframes login-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .dark-button {
