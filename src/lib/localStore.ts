@@ -96,6 +96,10 @@ function mergeById<T extends { id: string }>(
   return [...map.values()]
 }
 
+function assignUserId<T extends { user_id: string }>(items: T[], userId: string): T[] {
+  return items.map(item => item.user_id === userId ? item : { ...item, user_id: userId })
+}
+
 function migrateLegacyData(userId: string) {
   if (localStorage.getItem(LEGACY_MIGRATED_KEY)) return
   for (const key of Object.values(KEYS)) {
@@ -133,10 +137,15 @@ export async function syncCloudLibrary(userId: string) {
     const firstError = results.find(res => res.error)?.error
     if (firstError) throw firstError
 
-    const mergedBooks = mergeById(load<Book>(KEYS.books), booksRes.data ?? [], item => item.updated_at)
-    const mergedReviews = mergeById(load<ReviewLayer>(KEYS.reviews), reviewsRes.data ?? [], item => item.created_at)
-    const mergedQuotes = mergeById(load<Quote>(KEYS.quotes), quotesRes.data ?? [], item => item.created_at)
-    const mergedSparks = mergeById(load<Spark>(KEYS.sparks), sparksRes.data ?? [], item => item.created_at)
+    const localBooks = assignUserId(load<Book>(KEYS.books), userId)
+    const localReviews = assignUserId(load<ReviewLayer>(KEYS.reviews), userId)
+    const localQuotes = assignUserId(load<Quote>(KEYS.quotes), userId)
+    const localSparks = assignUserId(load<Spark>(KEYS.sparks), userId)
+
+    const mergedBooks = mergeById(localBooks, booksRes.data ?? [], item => item.updated_at)
+    const mergedReviews = mergeById(localReviews, reviewsRes.data ?? [], item => item.created_at)
+    const mergedQuotes = mergeById(localQuotes, quotesRes.data ?? [], item => item.created_at)
+    const mergedSparks = mergeById(localSparks, sparksRes.data ?? [], item => item.created_at)
 
     save(KEYS.books, mergedBooks)
     save(KEYS.reviews, mergedReviews)
