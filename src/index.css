@@ -1,0 +1,212 @@
+@import "tailwindcss";
+
+@theme {
+  --color-paper: #F7F3EA;
+  --color-oldpaper: #EDE4D3;
+  --color-ink: #312F2A;
+  --color-smoke: #746E62;
+  --color-ochre: #BC644E;
+  --color-indigo: #496F8E;
+  --color-moss: #5F8265;
+  --color-gold: #B7963E;
+}
+
+:root {
+  color-scheme: light;
+  --paper: #F8F5EF;
+  --paper-deep: #EFE8DD;
+  --paper-soft: #FFFDF8;
+  --ink: #26241F;
+  --smoke: #6F6A60;
+  --hairline: rgba(49, 47, 42, 0.12);
+  --shadow-soft: 0 18px 55px rgba(49, 47, 42, 0.08);
+  --shadow-card: 0 14px 36px rgba(49, 47, 42, 0.075);
+  --serif: "Noto Serif SC", "Songti SC", Georgia, serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100svh;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+::selection {
+  color: #FBF8F1;
+  background: #496F8E;
+}
+
+.app-shell {
+  min-height: 100svh;
+  background:
+    radial-gradient(circle at 52% 8%, rgba(255, 255, 255, 0.9), transparent 34%),
+    var(--paper);
+}
+
+.page-frame {
+  width: min(1180px, calc(100vw - 314px));
+  margin: 0 auto;
+  padding: 34px 0 44px;
+}
+
+.page-kicker {
+  color: var(--smoke);
+  font-size: 12px;
+  letter-spacing: 0;
+}
+
+.serif-title {
+  font-family: var(--serif);
+}
+
+.surface {
+  background: rgba(255, 253, 248, 0.76);
+  border: 1px solid var(--hairline);
+  box-shadow: var(--shadow-card);
+  backdrop-filter: blur(18px);
+}
+
+.paper-card {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.48), rgba(255, 255, 255, 0.08)),
+    var(--paper-soft);
+  border: 1px solid var(--hairline);
+  box-shadow: var(--shadow-card);
+}
+
+.page-title {
+  font-size: 34px;
+  line-height: 1.15;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.section-title {
+  font-size: 20px;
+  line-height: 1.3;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.ink-button {
+  background: linear-gradient(180deg, #4E7658, #3E684D);
+  color: var(--paper-soft);
+  border: 1px solid rgba(49, 47, 42, 0.12);
+  box-shadow: 0 10px 22px rgba(62, 104, 77, 0.20);
+}
+
+.ink-button:hover {
+  background: linear-gradient(180deg, #5B8364, #456F52);
+}
+
+.dark-button {
+  background: linear-gradient(180deg, #2D2C27, #1F1E1A);
+  color: #FFFDF8;
+  box-shadow: 0 12px 26px rgba(38, 36, 31, 0.18);
+}
+
+.warm-card {
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.88), rgba(255, 253, 248, 0.72)),
+    #FFFDF8;
+  border: 1px solid rgba(49, 47, 42, 0.11);
+  box-shadow: 0 18px 45px rgba(49, 47, 42, 0.075);
+}
+
+.soft-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  color: #FFFDF8;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.ghost-button {
+  color: var(--ink);
+  background: rgba(251, 248, 241, 0.58);
+  border: 1px solid var(--hairline);
+}
+
+.ghost-button:hover {
+  border-color: rgba(49, 47, 42, 0.24);
+  background: rgba(255, 255, 255, 0.64);
+}
+
+.field {
+  background: rgba(251, 248, 241, 0.82);
+  border: 1px solid var(--hairline);
+  color: var(--ink);
+  outline: none;
+}
+
+.field:focus {
+  border-color: rgba(73, 111, 142, 0.56);
+  box-shadow: 0 0 0 3px rgba(73, 111, 142, 0.14);
+}
+
+.book-shadow {
+  box-shadow:
+    14px 18px 30px rgba(49, 47, 42, 0.16),
+    inset -12px 0 18px rgba(0, 0, 0, 0.13);
+}
+
+@media (max-width: 767px) {
+  .page-frame {
+    width: min(100vw - 20px, 720px);
+    padding: 10px 0 calc(56px + env(safe-area-inset-bottom));
+  }
+
+  .page-title {
+    font-size: 24px;
+    line-height: 1.12;
+  }
+
+  .section-title {
+    font-size: 17px;
+  }
+
+  .surface,
+  .paper-card,
+  .warm-card {
+    box-shadow: 0 8px 22px rgba(49, 47, 42, 0.06);
+  }
+
+  .mobile-scroll {
+    margin-inline: -10px;
+    padding-inline: 10px;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: none;
+    scroll-snap-type: x proximity;
+  }
+
+  .mobile-scroll::-webkit-scrollbar {
+    display: none;
+  }
+}
