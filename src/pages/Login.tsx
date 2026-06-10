@@ -159,11 +159,12 @@ export default function Login() {
 
             <button
               type="submit"
+              disabled={loading || !canSubmit}
               aria-disabled={loading || !canSubmit}
               aria-busy={loading}
               className="ink-button login-submit-button w-full rounded-[8px] py-3 text-[14px] font-medium transition-colors"
             >
-              <span className="inline-flex min-h-5 items-center justify-center">
+              <span className="login-submit-label inline-flex min-h-5 items-center justify-center">
                 {loading ? '处理中...' : mode === 'signIn' ? '登录书房' : '创建账号'}
               </span>
             </button>

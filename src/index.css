@@ -130,6 +130,9 @@ button:disabled {
 }
 
 .ink-button {
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: #3E684D;
   background: linear-gradient(180deg, #4E7658, #3E684D);
   color: var(--paper-soft);
   border: 1px solid rgba(49, 47, 42, 0.12);
@@ -143,15 +146,50 @@ button:disabled {
 .login-submit-button {
   display: grid;
   place-items: center;
+  position: relative;
+  isolation: isolate;
   min-height: 48px;
   overflow: hidden;
+  background-color: #3E684D;
+  background-image: none;
+  border-color: rgba(49, 47, 42, 0.14);
+  color: #FFFDF8;
+  line-height: 1.25;
+  text-align: center;
+  transform: translateZ(0);
+  -webkit-font-smoothing: antialiased;
 }
 
+.login-submit-button::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(180deg, #5F8B67 0%, #3F6C50 100%);
+}
+
+.login-submit-button:hover::before {
+  background: linear-gradient(180deg, #66966F 0%, #477759 100%);
+}
+
+.login-submit-label {
+  position: relative;
+  z-index: 1;
+  color: inherit;
+}
+
+.login-submit-button:disabled,
 .login-submit-button[aria-disabled="true"] {
-  background: linear-gradient(180deg, #4E7658, #3E684D);
+  background-color: #3E684D;
+  background-image: none;
   color: #FFFDF8;
   opacity: 0.62;
   pointer-events: none;
+}
+
+.login-submit-button:disabled::before,
+.login-submit-button[aria-disabled="true"]::before {
+  background: linear-gradient(180deg, #4E7658 0%, #3E684D 100%);
 }
 
 .login-submit-button[aria-busy="true"] {

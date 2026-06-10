@@ -38,6 +38,36 @@ http://localhost:5173
 5. Output Directory 使用默认的 `dist`。
 6. 点击 Deploy。
 
+## 云端生成 Android APK
+
+项目已经配置 GitHub Actions 自动打包 APK：
+
+```text
+.github/workflows/build-android-apk.yml
+```
+
+推送到 `main` 分支后，或在 GitHub 仓库页面进入 `Actions` 手动运行 `Build Android APK`，云端会依次执行：
+
+```bash
+npm ci
+npm run build
+npx cap sync android
+cd android
+./gradlew assembleDebug
+```
+
+构建完成后，在该次 Action 运行页面底部的 `Artifacts` 中下载：
+
+```text
+study-nook-debug-apk
+```
+
+解压后可以得到调试版安装包：
+
+```text
+app-debug.apk
+```
+
 ## 数据存档说明
 
 当前项目支持两种模式：
