@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Navigate, Outlet } from 'react-router-dom'
 import { isDevMode, useAuth } from '../hooks/useAuth'
 import { ensureDemoLibrary, setActiveLibraryUser, syncCloudLibrary } from '../lib/localStore'
@@ -7,6 +7,7 @@ export default function RequireAuth() {
   const { user, loading } = useAuth()
   const [syncing, setSyncing] = useState(true)
   const [syncError, setSyncError] = useState('')
+  const lastAutoSyncAt = useRef(0)
 
   useEffect(() => {
     let cancelled = false
@@ -26,6 +27,7 @@ export default function RequireAuth() {
           ensureDemoLibrary(user.id)
         } else {
           await syncCloudLibrary(user.id)
+          lastAutoSyncAt.current = Date.now()
         }
       } catch {
         if (!cancelled) setSyncError('云同步暂时不可用，已使用本机缓存。')
@@ -36,6 +38,37 @@ export default function RequireAuth() {
 
     if (!loading) void prepareLibrary()
     return () => { cancelled = true }
+  }, [loading, user])
+
+  useEffect(() => {
+    if (loading || !user || isDevMode) return
+
+    async function syncIfStale() {
+      if (!user || document.visibilityState === 'hidden') return
+
+      const now = Date.now()
+      if (now - lastAutoSyncAt.current < 30_000) return
+      lastAutoSyncAt.current = now
+
+      try {
+        await syncCloudLibrary(user.id)
+        setSyncError('')
+      } catch {
+        setSyncError('云同步暂时不可用，已使用本机缓存。')
+      }
+    }
+
+    function handleVisibilityChange() {
+      if (document.visibilityState === 'visible') void syncIfStale()
+    }
+
+    window.addEventListener('focus', syncIfStale)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
+    return () => {
+      window.removeEventListener('focus', syncIfStale)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
   }, [loading, user])
 
   if (loading || syncing) {

@@ -11,6 +11,7 @@ const KEYS = {
 const ACTIVE_USER_KEY = 'shufang_active_user'
 const LEGACY_MIGRATED_KEY = 'shufang_legacy_migrated'
 const DEV_MODE = import.meta.env.VITE_DEV_MODE === 'true' || !hasSupabaseConfig
+export const LIBRARY_SYNC_EVENT = 'shufang-library-sync'
 
 type TableName = keyof Database['public']['Tables']
 type TableRow<T extends TableName> = Database['public']['Tables'][T]['Row']
@@ -42,6 +43,10 @@ function load<T>(key: string): T[] {
 
 function save<T>(key: string, items: T[]) {
   rawSave(scopedKey(key), items)
+}
+
+function notifyLibrarySynced() {
+  window.dispatchEvent(new CustomEvent(LIBRARY_SYNC_EVENT))
 }
 
 function cloudEnabled() {
@@ -158,6 +163,8 @@ export async function syncCloudLibrary(userId: string) {
       upsertRemoteMany('quotes', mergedQuotes),
       upsertRemoteMany('sparks', mergedSparks),
     ])
+
+    notifyLibrarySynced()
   } catch (error) {
     console.warn('[sync] Failed to sync cloud library', error)
     throw error

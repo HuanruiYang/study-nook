@@ -1,8 +1,8 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { isDevMode } from '../hooks/useAuth'
-import { getAllSparks, getBooks, getQuotes, getReviewLayers } from '../lib/localStore'
+import { getAllSparks, getBooks, getQuotes, getReviewLayers, syncCloudLibrary } from '../lib/localStore'
 import OpenBookLogo from '../components/OpenBookLogo'
 
 function countBookNotes(bookId: string) {
@@ -12,6 +12,9 @@ function countBookNotes(bookId: string) {
 export default function Account() {
   const { user, signOut } = useAuth()
   const navigate = useNavigate()
+  const [syncing, setSyncing] = useState(false)
+  const [syncMessage, setSyncMessage] = useState('')
+  const [statsVersion, setStatsVersion] = useState(0)
 
   const stats = useMemo(() => {
     const books = getBooks()
@@ -23,7 +26,23 @@ export default function Account() {
       sparks: sparkCount,
       reading: books.filter(book => book.status === 'reading').length,
     }
-  }, [])
+  }, [statsVersion])
+
+  async function handleManualSync() {
+    if (!user || syncing || isDevMode) return
+
+    setSyncing(true)
+    setSyncMessage('')
+    try {
+      await syncCloudLibrary(user.id)
+      setStatsVersion(version => version + 1)
+      setSyncMessage(`已同步 · ${new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}`)
+    } catch {
+      setSyncMessage('同步失败，请稍后再试')
+    } finally {
+      setSyncing(false)
+    }
+  }
 
   async function handleSignOut() {
     await signOut()
@@ -67,6 +86,23 @@ export default function Account() {
 
           <div className="mt-5 rounded-[8px] bg-[#F4EFE4]/72 p-4 text-[13px] leading-relaxed text-[#57534B]">
             同一邮箱和密码登录的设备会使用同一个云端账号。新增、编辑、删除书籍和札记后，会先保存在本机，再同步到 Supabase；另一台设备登录后会自动拉取同一账号的数据。
+          </div>
+
+          <div className="mt-4 flex flex-col gap-3 rounded-[8px] border border-[#5F8265]/16 bg-[#5F8265]/8 p-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <h2 className="text-[15px] font-semibold text-[#26241F]">多端同步</h2>
+              <p className="mt-1 text-[12px] text-[#6F6A60]">
+                {isDevMode ? '本机预览模式' : syncMessage || '自动同步会在回到页面时检查更新'}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleManualSync}
+              disabled={syncing || isDevMode || !user}
+              className="ink-button min-h-11 rounded-[8px] px-5 text-[14px] font-medium disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {syncing ? '同步中...' : '立即同步'}
+            </button>
           </div>
         </div>
 
