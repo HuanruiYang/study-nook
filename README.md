@@ -103,14 +103,3 @@ supabase/schema.sql
 ```
 
 同时在 Supabase Auth 的 URL Configuration 中，把你的线上域名加入 `Site URL` / `Redirect URLs`，否则邮件登录链接可能无法正确返回应用。
-
-## 不要上传到 GitHub 的内容
-
-```text
-node_modules
-dist
-.env.local
-screenshots
-```
-
-`.env.local` 里可能包含 Supabase 配置，不建议公开上传。可以上传 `.env.example` 作为示例。
